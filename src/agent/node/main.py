@@ -1,13 +1,13 @@
-from langchain_core.messages import SystemMessage, filter_messages, HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage, filter_messages
 from langgraph.runtime import Runtime
 from langgraph.store.base import BaseStore
 from langgraph.types import interrupt
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
 from src.agent.common.context import ContextSchema
 from src.agent.common.llm import model
-from src.agent.state.main import State, NeedReserveOutput
+from src.agent.state.main import NeedReserveOutput, State
 
 
 def get_store_info(state: State, runtime: Runtime[ContextSchema], *, store: BaseStore):
@@ -38,7 +38,7 @@ def identify_question(state: State):
     }
 
 def need_reserve(state: State) -> NeedReserveOutput:
-    prompt = f"已经为您推荐合适的房源，是否需要帮您预订房源？\n"
+    prompt = "已经为您推荐合适的房源，是否需要帮您预订房源？\n"
     prompt += "如果不需要,请输入'**不需要**'。\n"
     prompt += "如果需要,请输入'**需要**'。\n(注意输入其它值无效)\n"
     answer = interrupt(prompt)

@@ -2,8 +2,15 @@ from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 
 from src.agent.common.context import ContextSchema
-from src.agent.node.recommend import collect_user_info, list_tables, call_get_schema, generate_query, check_query, \
-    run_query_node, get_schema_node
+from src.agent.node.recommend import (
+    call_get_schema,
+    check_query,
+    collect_user_info,
+    generate_query,
+    get_schema_node,
+    list_tables,
+    run_query_node,
+)
 from src.agent.state.recommend import RecommendState
 
 builder = StateGraph(RecommendState, context_schema=ContextSchema)

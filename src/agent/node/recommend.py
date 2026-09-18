@@ -1,17 +1,20 @@
 import os
 import uuid
-from typing import Optional
 
 from dotenv import load_dotenv
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_community.utilities import SQLDatabase
-from langchain_core.messages import filter_messages, HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage,
+    filter_messages,
+)
 from langgraph.prebuilt import ToolNode
 from langgraph.runtime import Runtime
 from langgraph.store.base import BaseStore
 from langgraph.types import interrupt
-from pydantic import BaseModel, Field, UUID4
-from sqlalchemy.dialects.mssql.aioodbc import dialect
+from pydantic import BaseModel, Field
 
 from src.agent.common.context import ContextSchema
 from src.agent.common.llm import model
@@ -22,42 +25,41 @@ from src.agent.state.recommend import RecommendState, get_recommend_info
 # 定义用户信息的数据模型(结构化输出)
 class UserInfo(BaseModel):
     """用户的租房需求信息"""
-    city: Optional[str] = Field(
+    city: str | None = Field(
         default=None,
         description="用户所在或想要租房的城市，例如：西安、北京、上海"
     )
-    district: Optional[str] = Field(
+    district: str | None = Field(
         default=None,
         description="用户想要租房的具体区域或⾏政区，例如：雁塔区、碑林区、海淀区"
     )
-    budget_min: Optional[float] = Field(
+    budget_min: float | None = Field(
         default=None,
         description="用户的最低预算，单位为元/⽉，如果是xx元以内，要设置最小值为0"
     )
-    budget_max: Optional[float] = Field(
+    budget_max: float | None = Field(
         default=None,
         description="用户的最⾼预算，单位为元/⽉，如果是xx元以上，最大值设置为50000"
     )
-    room_type: Optional[str] = Field(
+    room_type: str | None = Field(
         default=None,
         description="房屋类型，例如：整租、合租、公寓、⼀室⼀厅、两室⼀厅"
     )
-    orientation: Optional[str] = Field(
+    orientation: str | None = Field(
         default=None,
         description="房屋朝向，例如：朝南、朝北、东南、南北通透"
     )
-    room_count: Optional[int] = Field(
+    room_count: int | None = Field(
         default=None,
         description="需要推荐的房屋数量"
     )
-    others: Optional[str] = Field(
+    others: str | None = Field(
         default=None,
         description="特殊要求，例如：带阳台、独⽴卫⽣间、近地铁、可养宠物、有电梯等"
     )
 
 def collect_user_info(state: RecommendState, runtime: Runtime[ContextSchema], *, store: BaseStore):
     """收集用户希望的推荐信息"""
-
     # 1. 获取需要被解析的数据：最新的用户消息 + 用户偏好数据
     user_messages = filter_messages(state["messages"], include_types="human")
     pref = state.get("user_preferences")
@@ -296,8 +298,8 @@ def check_query(state: RecommendState):
             "tool_calls=", getattr(msg, "tool_calls", None)
         )
 
-    check_query_system_prompt = """你是⼀个⾮常注重细节的SQL专家。
-    仔细检查{dialect}查询中的常⻅错误，包括：
+    check_query_system_prompt = f"""你是⼀个⾮常注重细节的SQL专家。
+    仔细检查{db.dialect}查询中的常⻅错误，包括：
     -使⽤NULL值的NOT IN
     -在应该使⽤UNION ALL时使⽤UNION
     -使⽤BETWEEN表⽰独占范围
@@ -307,7 +309,7 @@ def check_query(state: RecommendState):
     -转换为正确的数据类型
     -使⽤合适的列进⾏连接
     如果存在上述任何错误，请重写查询。如果没有错误，只需复制原始查询即可。
-    在运⾏此检查之后，您将调⽤适当的⼯具来执⾏查询。""".format(dialect=db.dialect)
+    在运⾏此检查之后，您将调⽤适当的⼯具来执⾏查询。"""
     system_message = SystemMessage(content=check_query_system_prompt)
     # 将SQL当作用户消息传入进行检查
     tool_call = state["messages"][-1].tool_calls[0]

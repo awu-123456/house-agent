@@ -1,5 +1,5 @@
 from langgraph.constants import START
-from langgraph.graph import StateGraph, MessagesState
+from langgraph.graph import MessagesState, StateGraph
 
 from src.agent.node.extend import extend_node
 

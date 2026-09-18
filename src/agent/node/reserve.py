@@ -3,12 +3,13 @@ from typing import Annotated, Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
-from langgraph.prebuilt import ToolRuntime, InjectedStore, ToolNode
+from langgraph.prebuilt import InjectedStore, ToolNode, ToolRuntime
 from langgraph.types import interrupt
 
 from src.agent.common.llm import model
 from src.agent.common.store import ReservedInfo, UserPreferences
 from src.agent.state.reserve import ReserveState
+
 
 # 节点：获取预定的房源名称
 def get_title(state: ReserveState):
@@ -67,8 +68,7 @@ def add_reserve_message(state: ReserveState):
 @tool
 def generate_orders(phone_number: str, id_card: str, house_title: str,
                     runtime: ToolRuntime, store: Annotated[Any, InjectedStore()]) -> str:
-    """
-    根据用户电话、身份证、预定的房源，生成工单号。
+    """根据用户电话、身份证、预定的房源，生成工单号。
 
     Args:
         phone_number: 用户电话
@@ -76,8 +76,7 @@ def generate_orders(phone_number: str, id_card: str, house_title: str,
         house_title：用户要预定的房源标题
         runtime：工具的运行时信息
         store：注入工具的持久存储
-        """
-
+    """
     # 1. 模拟生成工单号(扩展：持久化订单表)
     order_id = str(uuid.uuid4())
 
