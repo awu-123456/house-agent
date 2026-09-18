@@ -54,4 +54,4 @@ jobs:
       - name: Run tests with pytest
         run: |
           uv pip install pytest
-          uv run pytest tests/unit_tests
+          PYTHONPATH=. uv run pytest tests/unit_tests
