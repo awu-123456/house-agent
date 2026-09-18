@@ -52,6 +52,8 @@ jobs:
           ignore_words_file: .codespellignore
           path: src/
       - name: Run tests with pytest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           uv pip install pytest
           PYTHONPATH=. uv run pytest tests/unit_tests
